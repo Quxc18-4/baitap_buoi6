@@ -3,6 +3,9 @@ var router = express.Router();
 
 let roleModel = require("../schemas/roles");
 
+let { checkLogin } = require("../utils/authHandler");
+
+router.use(checkLogin);
 
 router.get("/", async function (req, res, next) {
     let roles = await roleModel.find({ isDeleted: false });

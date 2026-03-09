@@ -7,6 +7,7 @@ let { checkLogin } = require('../utils/authHandler')
 
 let userController = require("../controllers/users");
 
+router.use(checkLogin);
 
 router.get("/", checkLogin, async function (req, res, next) {
   let result = await userController.getAllUser();
