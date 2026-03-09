@@ -62,6 +62,7 @@ userSchema.pre('save', function (next) {
   let genSalt = bcrypt.genSaltSync(10);
   let newPass = bcrypt.hashSync(this.password, genSalt)
   this.password = newPass;
+  next();
 })
 
 module.exports = mongoose.model("user", userSchema);
