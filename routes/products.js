@@ -4,6 +4,7 @@ let productModel = require('../schemas/products')
 let { ConvertTitleToSlug } = require('../utils/titleHandler')
 let { getMaxID } = require('../utils/IdHandler')
 
+let { checkLogin, checkRole } = require('../utils/authHandler');
 //getall
 router.get('/', async function (req, res, next) {
   // let queries = req.query;
@@ -42,8 +43,7 @@ router.get('/:id', async function (req, res, next) {
   }
 });
 
-
-router.post('/', async function (req, res, next) {
+router.post('/', checkLogin, checkRole('admin', 'mod'), async function (req, res, next) {
   let newItem = new productModel({
     title: req.body.title,
     slug: ConvertTitleToSlug(req.body.title),
@@ -70,7 +70,8 @@ router.post('/', async function (req, res, next) {
   // //console.log(g);
 
 })
-router.put('/:id', async function (req, res, next) {
+
+router.put('/:id', checkLogin, checkRole('admin', 'mod'), async function (req, res, next) {
   let id = req.params.id;
   let updatedItem = await productModel.findByIdAndUpdate(
     id, req.body, {
@@ -80,7 +81,8 @@ router.put('/:id', async function (req, res, next) {
   res.send(updatedItem)
 
 })
-router.delete('/:id', async function (req, res, next) {
+
+router.delete('/:id', checkLogin, checkRole('admin'), async function (req, res, next) {
   let id = req.params.id;
   let updatedItem = await productModel.findByIdAndUpdate(
     id, {
