@@ -3,17 +3,17 @@ var router = express.Router();
 
 let roleModel = require("../schemas/roles");
 
-let { checkLogin } = require("../utils/authHandler");
+let { checkLogin, checkRole } = require("../utils/authHandler");
 
 router.use(checkLogin);
 
-router.get("/", async function (req, res, next) {
+router.get("/", checkRole('admin', 'mod'), async function (req, res, next) {
     let roles = await roleModel.find({ isDeleted: false });
     res.send(roles);
 });
 
 
-router.get("/:id", async function (req, res, next) {
+router.get("/:id", checkRole('admin', 'mod'), async function (req, res, next) {
     try {
         let result = await roleModel.find({ _id: req.params.id, isDeleted: false });
         if (result.length > 0) {
@@ -28,7 +28,7 @@ router.get("/:id", async function (req, res, next) {
 });
 
 
-router.post("/", async function (req, res, next) {
+router.post("/", checkRole('admin'), async function (req, res, next) {
     try {
         let newItem = new roleModel({
             name: req.body.name,
@@ -41,7 +41,7 @@ router.post("/", async function (req, res, next) {
     }
 });
 
-router.put("/:id", async function (req, res, next) {
+router.put("/:id", checkRole('admin'), async function (req, res, next) {
     try {
         let id = req.params.id;
         let updatedItem = await roleModel.findByIdAndUpdate(id, req.body, { new: true });
@@ -54,7 +54,7 @@ router.put("/:id", async function (req, res, next) {
     }
 });
 
-router.delete("/:id", async function (req, res, next) {
+router.delete("/:id", checkRole('admin'), async function (req, res, next) {
     try {
         let id = req.params.id;
         let updatedItem = await roleModel.findByIdAndUpdate(

@@ -1,4 +1,5 @@
 let jwt = require('jsonwebtoken')
+let userModel = require("../schemas/users");
 module.exports = {
     checkLogin: function (req, res, next) {
         try {
@@ -24,6 +25,25 @@ module.exports = {
                 message: "ban chua dang nhap"
             })
             return;
+        }
+    },
+    checkRole: function (...requiredRole) {
+        return async function (req, res, next) {
+            try {
+                let userId = req.userId;
+                let getUser = await userModel.findById(userId).populate('role');
+                                if (!getUser || !getUser.role) {
+                    return res.status(403).send({ message: "Tai khoan chua duoc cap quyen (role trống)" });
+                }
+                let roleName = getUser.role.name; 
+                if (requiredRole.includes(roleName)) {
+                    next();
+                } else {
+                    return res.status(403).send({ message: "ban khong co quyen" });
+                }
+            } catch (error) {
+                return res.status(500).send({ message: "Lỗi server khi check quyền: " + error.message });
+            }
         }
     }
 }

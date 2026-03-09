@@ -3,18 +3,19 @@ var router = express.Router();
 let bcrypt = require('bcrypt')
 let { userPostValidation, validateResult } =
   require('../utils/validationHandler')
-let { checkLogin } = require('../utils/authHandler')
+let { checkLogin, checkRole } = require("../utils/authHandler")
 
+let userModel = require("../schemas/users");
 let userController = require("../controllers/users");
 
 router.use(checkLogin);
 
-router.get("/", checkLogin, async function (req, res, next) {
+router.get("/",checkRole('admin', 'mod'), async function (req, res, next) {
   let result = await userController.getAllUser();
   res.send(result)
 });
 
-router.get("/:id",checkLogin, async function (req, res, next) {
+router.get("/:id",checkRole('admin', 'mod'), async function (req, res, next) {
   try {
     let result = await userController.FindByID(req.params.id)
     if (result) {
@@ -28,7 +29,7 @@ router.get("/:id",checkLogin, async function (req, res, next) {
   }
 });
 
-router.post("/", userPostValidation, validateResult,
+router.post("/", checkRole('admin'), userPostValidation, validateResult,
   async function (req, res, next) {
     try {
       let newItem = await userController.CreateAnUser(
@@ -47,7 +48,7 @@ router.post("/", userPostValidation, validateResult,
     }
   });
 
-router.put("/:id", async function (req, res, next) {
+router.put("/:id", checkRole('admin'), async function (req, res, next) {
   try {
     let id = req.params.id;
     let updatedItem = await userModel.findOne({ _id: id, isDeleted: false })
@@ -64,7 +65,7 @@ router.put("/:id", async function (req, res, next) {
     res.status(400).send({ message: err.message });
   }
 });
-router.delete("/:id", async function (req, res, next) {
+router.delete("/:id", checkRole('admin'), async function (req, res, next) {
   try {
     let id = req.params.id;
     let updatedItem = await userModel.findByIdAndUpdate(
